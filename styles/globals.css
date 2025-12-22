@@ -1,0 +1,44 @@
+:root {
+    --font-family: 'Open Sans', sans-serif;
+    --font-size-header: 24px;
+    --font-size-input: 14px;
+
+    /* Colors */
+    --color-background: #0f1220;
+    --color-card-bg: #161a2e;
+    --color-card-border: #24284a;
+    --color-input-bg: #12152b;
+    --color-input-border: #2c3170;
+    --color-input-text: #ffffff;
+    --color-submit-btn-bg: #6c7cff;
+    --color-focus-border: #6c7cff;
+    --color-submit-btn-text: #ffffff;
+    --color-error: #ff5c6a;
+    --color-header-subtext: #8b8ea8;
+
+    /* Dimensions */
+    --container-max-width: 500px;
+    --side-gap: 20px;
+
+    --border-radius-card: 16px;
+    --border-radius-input: 8px;
+    --padding-card: 40px;
+    --submit-btn-height: 50px;
+}
+
+/* حل مشکل چسبیدن به گوشه */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-background);
+}
+
+#__next {
+    display: flex;
+    justify-content: center; /* وسط‌چین افقی */
+    align-items: center;     /* وسط‌چین عمودی */
+    width: 100%;
+    min-height: 100vh;       /* ارتفاع کل صفحه */
+    padding: 20px 0;         /* کمی فاصله برای گوشی‌های کوچک که فرم در صفحه جا شود */
+}
