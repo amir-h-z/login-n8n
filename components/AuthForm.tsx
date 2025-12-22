@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import type { Options } from 'canvas-confetti';
 
 export default function AuthForm() {
     const [mode, setMode] = useState<'signup' | 'login'>('signup');
@@ -17,12 +18,12 @@ export default function AuthForm() {
         const confetti = (await import('canvas-confetti')).default;
 
         const count = 200;
-        const defaults = {
+        const defaults: Options = {
             origin: { y: 0.7 },
-            zIndex: 999
+            zIndex: 999,
         };
 
-        function fire(particleRatio: number, opts: any) {
+        function fire(particleRatio: number, opts: Partial<Options>) {
             confetti({
                 ...defaults,
                 ...opts,
@@ -30,9 +31,7 @@ export default function AuthForm() {
             });
         }
 
-        // پرتاب از سمت چپ
         fire(0.25, { spread: 26, startVelocity: 55, origin: { x: 0, y: 0.6 } });
-        // پرتاب از سمت راست
         fire(0.25, { spread: 26, startVelocity: 55, origin: { x: 1, y: 0.6 } });
 
         fire(0.2, { spread: 60 });
