@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         return res.status(n8nResponse.status).json(data);
 
-    } catch (error: any) {
+    } catch {
         // اگر سرور کلاً خاموش بود یا اینترنت نداشتید
         return res.status(503).json({
             errors: { general: "Server is unreachable. Please try again later." }
