@@ -6,7 +6,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        const n8nResponse = await fetch('https://amirhosseinzeiny.app.n8n.cloud/webhook-test/8b6f7985-fa88-44d5-9f19-28b832b11163', {
+        const n8nResponse = await fetch('https://amirhosseinzeiny.app.n8n.cloud/webhook/8b6f7985-fa88-44d5-9f19-28b832b11163', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(req.body),
