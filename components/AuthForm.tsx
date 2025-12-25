@@ -31,7 +31,7 @@ export default function AuthForm() {
 
     // --- Effects ---
 
-    // Timer Logic
+    // مدیریت تایمر
     useEffect(() => {
         let timer: NodeJS.Timeout;
         if ((isOtpStep || (isForgotMode && forgotStage === 'otp')) && timeLeft > 0) {
@@ -40,7 +40,7 @@ export default function AuthForm() {
         return () => clearInterval(timer);
     }, [isOtpStep, isForgotMode, forgotStage, timeLeft]);
 
-    // Auto-focus OTP
+    // فوکوس خودکار روی OTP
     useEffect(() => {
         if (isOtpStep || (isForgotMode && forgotStage === 'otp')) {
             const timer = setTimeout(() => otpRefs.current[0]?.focus(), 100);
@@ -63,43 +63,69 @@ export default function AuthForm() {
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
     };
 
+    // پاک کردن ارور فیلد هنگام تایپ
     const handleInputChange = (fieldName: string, value: string, setter: (val: string) => void) => {
         setter(value);
         setFieldErrors((prev) => {
-            const { [fieldName]: _, general: __, ...rest } = prev;
-            return rest;
+            const newErrors = { ...prev };
+            delete newErrors[fieldName];
+            delete newErrors.general;
+            return newErrors;
         });
     };
 
-    // پاک کردن ارورها هنگام جابجایی بین بخش‌ها
     const resetNavigation = () => {
         setFieldErrors({});
         setOtp(['', '', '', '', '']);
+        setIsLoading(false);
     };
 
-    // --- OTP Logic ---
+    // --- Validation Logic ---
+
+    const validateForm = () => {
+        const errors: Record<string, string> = {};
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email.trim()) errors.email = 'Email is required';
+        else if (!emailRegex.test(email)) errors.email = 'Invalid email format';
+
+        if (isForgotMode) {
+            if (forgotStage === 'reset') {
+                if (!newPassword) errors.newPassword = 'New password is required';
+                if (newPassword !== confirmNewPassword) errors.confirmNewPassword = 'Passwords do not match';
+            }
+            return errors;
+        }
+
+        if (!password) errors.password = 'Password is required';
+
+        if (mode === 'signup') {
+            if (!firstName.trim()) errors.firstName = 'First name is required';
+            if (!lastName.trim()) errors.lastName = 'Last name is required';
+            if (password !== confirmPassword) errors.confirmPassword = 'Passwords do not match';
+            if (!confirmPassword) errors.confirmPassword = 'Please confirm password';
+        }
+
+        return errors;
+    };
+
+    // --- Handlers ---
 
     const handleOtpChange = (index: number, value: string) => {
         if (isNaN(Number(value))) return;
         const newOtp = [...otp];
         newOtp[index] = value.substring(value.length - 1);
         setOtp(newOtp);
-
         if (value && index < 4) otpRefs.current[index + 1]?.focus();
-
-        // ارسال خودکار
         if (newOtp.every(d => d !== '') && newOtp.length === 5) {
             handleOtpSubmit(newOtp.join(''));
         }
     };
 
     const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
-        if (e.key === 'Backspace' && !otp[index] && index > 0) {
-            otpRefs.current[index - 1]?.focus();
-        }
+        if (e.key === 'Backspace' && !otp[index] && index > 0) otpRefs.current[index - 1]?.focus();
     };
 
-    // تابع مشترک برای کلیک دکمه و ارسال خودکار OTP
     const handleOtpSubmit = (code: string) => {
         if (code.length < 5) return;
         if (isForgotMode) verifyForgotOtp(code);
@@ -110,6 +136,12 @@ export default function AuthForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const errors = validateForm();
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(errors);
+            return;
+        }
+
         setFieldErrors({});
         setIsLoading(true);
 
@@ -156,6 +188,9 @@ export default function AuthForm() {
 
     const handleForgotRequest = async (e: React.FormEvent) => {
         e.preventDefault();
+        const errors = validateForm();
+        if (errors.email) { setFieldErrors(errors); return; }
+
         setIsLoading(true);
         try {
             const res = await fetch('/api/auth', {
@@ -187,7 +222,9 @@ export default function AuthForm() {
 
     const handlePasswordUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (newPassword !== confirmNewPassword) { setFieldErrors({ general: 'Passwords do not match' }); return; }
+        const errors = validateForm();
+        if (Object.keys(errors).length > 0) { setFieldErrors(errors); return; }
+
         setIsLoading(true);
         try {
             const res = await fetch('/api/auth', {
@@ -231,7 +268,8 @@ export default function AuthForm() {
                         <form onSubmit={handleForgotRequest}>
                             <div className="form-group">
                                 <label>Email Address</label>
-                                <input type="email" placeholder="" className={fieldErrors.email ? 'input-error' : ''} value={email} onChange={(e) => handleInputChange('email', e.target.value, setEmail)} />
+                                <input type="email" className={fieldErrors.email ? 'input-error' : ''} value={email} onChange={(e) => handleInputChange('email', e.target.value, setEmail)} />
+                                {fieldErrors.email && <span className="error-hint">{fieldErrors.email}</span>}
                             </div>
                             {fieldErrors.general && <div className="error-message-box">{fieldErrors.general}</div>}
                             <button type="submit" className="submit-btn" disabled={isLoading}>{isLoading ? 'Sending...' : 'Send Code'}</button>
@@ -263,11 +301,13 @@ export default function AuthForm() {
                         <form onSubmit={handlePasswordUpdate}>
                             <div className="form-group">
                                 <label>New Password</label>
-                                <input type="password" placeholder="" value={newPassword} onChange={e => handleInputChange('newPassword', e.target.value, setNewPassword)} />
+                                <input type="password" className={fieldErrors.newPassword ? 'input-error' : ''} value={newPassword} onChange={e => handleInputChange('newPassword', e.target.value, setNewPassword)} />
+                                {fieldErrors.newPassword && <span className="error-hint">{fieldErrors.newPassword}</span>}
                             </div>
                             <div className="form-group">
                                 <label>Confirm New Password</label>
-                                <input type="password" placeholder="" value={confirmNewPassword} onChange={e => handleInputChange('confirmNewPassword', e.target.value, setConfirmNewPassword)} />
+                                <input type="password" className={fieldErrors.confirmNewPassword ? 'input-error' : ''} value={confirmNewPassword} onChange={e => handleInputChange('confirmNewPassword', e.target.value, setConfirmNewPassword)} />
+                                {fieldErrors.confirmNewPassword && <span className="error-hint">{fieldErrors.confirmNewPassword}</span>}
                             </div>
                             {fieldErrors.general && <div className="error-message-box">{fieldErrors.general}</div>}
                             <button type="submit" className="submit-btn" disabled={isLoading}>{isLoading ? 'Updating...' : 'Update Password'}</button>
@@ -312,24 +352,24 @@ export default function AuthForm() {
                     <div className="form-row">
                         <div className="form-group">
                             <label>First Name</label>
-                            <input type="text" placeholder="" className={fieldErrors.firstName ? 'input-error' : ''} value={firstName} onChange={(e) => handleInputChange('firstName', e.target.value, setFirstName)} />
+                            <input type="text" className={fieldErrors.firstName ? 'input-error' : ''} value={firstName} onChange={(e) => handleInputChange('firstName', e.target.value, setFirstName)} />
                             {fieldErrors.firstName && <span className="error-hint">{fieldErrors.firstName}</span>}
                         </div>
                         <div className="form-group">
                             <label>Last Name</label>
-                            <input type="text" placeholder="" className={fieldErrors.lastName ? 'input-error' : ''} value={lastName} onChange={(e) => handleInputChange('lastName', e.target.value, setLastName)} />
+                            <input type="text" className={fieldErrors.lastName ? 'input-error' : ''} value={lastName} onChange={(e) => handleInputChange('lastName', e.target.value, setLastName)} />
                             {fieldErrors.lastName && <span className="error-hint">{fieldErrors.lastName}</span>}
                         </div>
                     </div>
                 )}
                 <div className="form-group">
                     <label>Email Address</label>
-                    <input type="email" placeholder="" className={fieldErrors.email ? 'input-error' : ''} value={email} onChange={(e) => handleInputChange('email', e.target.value, setEmail)} />
+                    <input type="email" className={fieldErrors.email ? 'input-error' : ''} value={email} onChange={(e) => handleInputChange('email', e.target.value, setEmail)} />
                     {fieldErrors.email && <span className="error-hint">{fieldErrors.email}</span>}
                 </div>
                 <div className="form-group" style={{ marginBottom: mode === 'login' ? '8px' : '16px' }}>
                     <label>Password</label>
-                    <input type="password" placeholder="" className={fieldErrors.password ? 'input-error' : ''} value={password} onChange={(e) => handleInputChange('password', e.target.value, setPassword)} />
+                    <input type="password" className={fieldErrors.password ? 'input-error' : ''} value={password} onChange={(e) => handleInputChange('password', e.target.value, setPassword)} />
                     {fieldErrors.password && <span className="error-hint">{fieldErrors.password}</span>}
                 </div>
 
@@ -344,7 +384,7 @@ export default function AuthForm() {
                 {mode === 'signup' && (
                     <div className="form-group">
                         <label>Confirm Password</label>
-                        <input type="password" placeholder="" className={fieldErrors.confirmPassword ? 'input-error' : ''} value={confirmPassword} onChange={(e) => handleInputChange('confirmPassword', e.target.value, setConfirmPassword)} />
+                        <input type="password" className={fieldErrors.confirmPassword ? 'input-error' : ''} value={confirmPassword} onChange={(e) => handleInputChange('confirmPassword', e.target.value, setConfirmPassword)} />
                         {fieldErrors.confirmPassword && <span className="error-hint">{fieldErrors.confirmPassword}</span>}
                     </div>
                 )}
