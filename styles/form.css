@@ -187,6 +187,128 @@ button[type="submit"]:disabled {
     justify-content: center;
 }
 
+.otp-wrapper {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 20px 0 30px 0;
+}
+
+.otp-input {
+    width: 100%;
+    height: 60px !important;
+    text-align: center;
+    font-size: 24px !important;
+    font-weight: bold;
+    border: 2px solid var(--color-input-border);
+    border-radius: 12px;
+    background-color: var(--color-input-bg);
+    color: #fff;
+    transition: all 0.2s;
+}
+
+.otp-input:focus {
+    border-color: var(--color-focus-border);
+    background-color: rgba(108, 124, 255, 0.05);
+    box-shadow: 0 0 10px rgba(108, 124, 255, 0.2);
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--color-header-subtext);
+    font-size: 14px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.text-btn {
+    background: transparent !important;
+    color: var(--color-header-subtext) !important;
+    font-size: 13px !important;
+    margin-top: 15px !important;
+    text-decoration: underline;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    height: auto !important;
+}
+
+.text-btn:hover {
+    color: #fff !important;
+}
+
+/* دکمه بازگشت */
+.back-button {
+    background: transparent;
+    border: none;
+    color: var(--color-header-subtext);
+    cursor: pointer;
+    padding: 5px;
+    margin-bottom: 10px;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.back-button:hover {
+    color: #fff;
+}
+
+/* تایمر */
+.timer-container {
+    text-align: center;
+    margin-bottom: 20px;
+    height: 20px; /* جلوگیری از پرش محتوا */
+}
+
+.timer-text {
+    font-size: 13px;
+    color: var(--color-header-subtext);
+}
+
+.time-highlight {
+    color: var(--color-focus-border);
+    font-weight: bold;
+    font-variant-numeric: tabular-nums; /* جلوگیری از تکان خوردن اعداد */
+}
+
+.resend-link {
+    background: transparent;
+    border: none;
+    color: var(--color-focus-border);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.resend-link:hover {
+    color: #fff;
+}
+
+.submit-btn, button[type="submit"] {
+    width: 100%;
+    height: var(--submit-btn-height);
+    background-color: var(--color-submit-btn-bg);
+    color: #fff;
+    border: none;
+    border-radius: var(--border-radius-input);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.2s ease;
+}
+
+.submit-btn:hover {
+    filter: brightness(1.1); /* کمی روشن‌تر هنگام هاور */
+}
+
+.submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 @media (max-width: 540px) {
     .card { padding: 30px 20px; }
     .form-row { flex-direction: column; gap: 0; }
